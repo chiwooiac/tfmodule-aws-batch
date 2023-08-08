@@ -3,6 +3,11 @@ variable "name" {
   type        = string
 }
 
+variable "name_alias" {
+  description = "Specifies the alias of the job definition."
+  type        = string
+}
+
 variable "type" {
   description = "The type of job definition. Must be container"
   type        = string
@@ -19,8 +24,6 @@ container_properties = {
   executionRoleArn = "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
   jobRoleArn       = "arn:aws:iam::123456789012:role/ecsJobExecutionRole"
   image            = "busybox"
-  vcpus            = 1
-  memory           = 128
   command          = ["echo", "hello"]
   timeout          = {
     attempt_duration_seconds = 3600
@@ -59,7 +62,7 @@ EOF
 variable "parameters" {
   description = "Specifies the parameter substitution placeholders to set in the job definition."
   type        = any
-  default     = {}
+  default     = null
 }
 
 variable "platform_capabilities" {
@@ -106,35 +109,6 @@ variable "propagate_tags" {
   type        = bool
   default     = false
 }
-
-variable "execution_role_arn" {
-  description = "ARN for the role assumed by tasks"
-  type        = string
-  default     = null
-}
-#
-#variable "execution_role_identifiers" {
-#  description = "Service identifiers for the AssumeRole of ECS tasks"
-#  type        = list(string)
-#  default     = ["ecs-tasks.amazonaws.com"]
-#}
-#variable "executor_custom_policy_json" {
-#  description = "Service identifiers for the AssumeRole of ECS tasks"
-#  type        = string
-#  default     = null
-#}
-#
-#variable "job_role_arn" {
-#  description = "ARN for the role assumed by jobs"
-#  type        = string
-#  default     = null
-#}
-#
-#variable "job_role_identifiers" {
-#  description = "Service identifiers for the AssumeRole of jobs"
-#  type        = list(string)
-#  default     = ["ecs-tasks.amazonaws.com"]
-#}
 
 variable "tags" {
   type    = map(string)

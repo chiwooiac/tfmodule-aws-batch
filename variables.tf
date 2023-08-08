@@ -143,9 +143,6 @@ variable "job_definitions" {
       parameters                 = {}
       retry_strategy             = {}
       attempt_duration_seconds   = null
-      execution_role_arn         = null
-      execution_role_identifiers = null
-      job_role_arn               = null
     }
   }
   description = <<EOF

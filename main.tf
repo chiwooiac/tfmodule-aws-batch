@@ -3,6 +3,7 @@ locals {
   name_prefix              = var.context.name_prefix
   tags                     = var.context.tags
   compute_environment_name = format("%s-%s-ce", local.name_prefix, var.name)
+  ecs_cluster_name         = format("%s-%s-ecs", local.name_prefix, var.name)
   sg_name                  = format("%s-%s-sg", local.name_prefix, var.name)
   job_prefix_name          = format("%s-%s", local.name_prefix, var.name)
   security_group_ids       = var.enabled_default_security_group ? concat(var.security_group_ids, [
@@ -23,7 +24,7 @@ resource "aws_batch_compute_environment" "this" {
       instance_role       = aws_iam_instance_profile.ecs.arn
       instance_type       = tolist(var.instance_type)
       security_group_ids  = local.security_group_ids
-      subnets             = coalesce(data.aws_subnets.this.ids)
+      subnets             = coalesce(var.subnet_ids)
       min_vcpus           = var.min_vcpus
       max_vcpus           = var.max_vcpus
       desired_vcpus       = var.desired_vcpus
@@ -44,6 +45,7 @@ resource "aws_batch_compute_environment" "this" {
     }
   }
 
+  tags = merge(local.tags, { Name = local.compute_environment_name })
 
   // To prevent a race condition during environment deletion, make sure to set depends_on to the related
   // aws_iam_role_policy_attachment; otherwise, the policy may be destroyed too soon and the compute environment
@@ -55,7 +57,8 @@ resource "aws_batch_compute_environment" "this" {
 module "jq" {
   source                = "./jq/"
   for_each              = {for k, v in var.job_queues : k => v if length(var.job_queues) > 0}
-  name                  = format("%s-%s-jq", local.job_prefix_name, each.value.name)
+  name                  = format("%s-%s", local.job_prefix_name, each.value.name)
+  name_alias            = each.value.name
   state                 = try(each.value.state, "ENABLED")
   priority              = try(each.value.priority, 1)
   scheduling_policy_arn = try(each.value.scheduling_policy_arn, null)
@@ -65,17 +68,16 @@ module "jq" {
 }
 
 module "jd" {
-  source                     = "./jd/"
-  for_each                   = {for k, v in var.job_definitions : k => v if length(var.job_definitions) > 0}
-  name                       = format("%s-%s-jd", local.job_prefix_name, each.value.name)
-  type                       = try(each.value.type, "container")
-  platform_capabilities      = try(each.value.platform_capabilities, ["FARGATE"])
-  container_properties       = try(jsonencode(each.value.container_properties), {})
-  retry_strategy             = try(each.value.retry_strategy, {})
-  parameters                 = try(each.value.parameters, {})
-  attempt_duration_seconds   = try(each.value.attempt_duration_seconds, null)
-  execution_role_arn         = try(each.value.execution_role_arn, null)
-  # job_role_arn             = try(each.value.job_role_arn, null)
-  tags                       = local.tags
-  depends_on                 = [aws_batch_compute_environment.this]
+  source                   = "./jd/"
+  for_each                 = {for k, v in var.job_definitions : k => v if length(var.job_definitions) > 0}
+  name                     = format("%s-%s", local.job_prefix_name, each.value.name)
+  name_alias               = each.value.name
+  type                     = try(each.value.type, "container")
+  platform_capabilities    = try(each.value.platform_capabilities, ["FARGATE"])
+  container_properties     = try(jsonencode(each.value.container_properties), {})
+  retry_strategy           = try(each.value.retry_strategy, {})
+  parameters               = try(each.value.parameters, null)
+  attempt_duration_seconds = try(each.value.attempt_duration_seconds, null)
+  tags                     = local.tags
+  depends_on               = [aws_batch_compute_environment.this]
 }

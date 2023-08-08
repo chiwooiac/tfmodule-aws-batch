@@ -1,5 +1,5 @@
 locals {
-  jd_name     = format("%s-jd", var.name)
+  jd_name = format("%s-jd", var.name)
 }
 
 resource "aws_batch_job_definition" "this" {
@@ -8,8 +8,9 @@ resource "aws_batch_job_definition" "this" {
   platform_capabilities = var.platform_capabilities
   container_properties  = var.container_properties
   parameters            = var.parameters
+
   dynamic "retry_strategy" {
-    for_each = var.retry_strategy != null ? [var.retry_strategy] : []
+    for_each = length(var.retry_strategy) > 0 ? [var.retry_strategy] : []
     content {
       attempts = lookup(retry_strategy.value, "attempts", null)
       dynamic "evaluate_on_exit" {
@@ -32,5 +33,7 @@ resource "aws_batch_job_definition" "this" {
   }
 
   propagate_tags = var.propagate_tags
-  tags           = merge(var.tags, { Name = local.jd_name})
+
+  tags = merge(var.tags, { Name = local.jd_name })
+
 }
