@@ -37,7 +37,7 @@ resource "aws_batch_compute_environment" "this" {
     content {
       type               = var.compute_type
       security_group_ids = local.security_group_ids
-      subnets            = coalesce(data.aws_subnets.this.ids)
+      subnets            = coalesce(var.subnet_ids)
       min_vcpus          = var.min_vcpus
       max_vcpus          = var.max_vcpus
       desired_vcpus      = var.desired_vcpus

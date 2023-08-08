@@ -62,21 +62,20 @@ variable "enabled_default_security_group" {
   default = true
 }
 
-variable "security_group_ids" {
-  type        = list(string)
-  default     = []
-  description = "Security group ids to be used by the Compute Environment."
-}
-
 variable "vpc_id" {
   description = "VPC ID to launch Compute Environment."
   type        = string
 }
 
-variable "subnet_prefix_name" {
-  description = "Subnet Prefix name to place Batch Worker nodes."
-  type        = string
-  default     = null
+variable "subnet_ids" {
+  description = "Subnet IDs to place Batch Worker nodes."
+  type        = list(string)
+}
+
+variable "security_group_ids" {
+  type        = list(string)
+  default     = []
+  description = "Security group ids to be used by the Compute Environment."
 }
 
 # Batch Job Queue

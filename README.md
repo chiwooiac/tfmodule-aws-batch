@@ -8,20 +8,23 @@ tfmodule-aws-batch
 module "batch" {
   source = "../../"
 
-  context            = {
+  context = {
     project     = "symple"
     name_prefix = "symple-mc1s"
     tags        = {
       Team = "DevOps",
     }
   }
-  name               = "alice"
-  vpc_id             = "vpc_1234567"
-  subnet_prefix_name = "subnet_1234567"
-  min_vcpus          = 0
-  max_vcpus          = 2
-  desired_vcpus      = 0
-  job_queues         = {
+  name       = "alice"
+  vpc_id     = "vpc_1234567"
+  subnet_ids = [
+    "subnet-00c136a3eb6ada241",
+    "subnet-011824394fc2ff1f1"
+  ]
+  min_vcpus     = 0
+  max_vcpus     = 2
+  desired_vcpus = 0
+  job_queues    = {
     default = {
       name = "default"
     }
