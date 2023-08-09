@@ -77,7 +77,7 @@ module "jd" {
   container_properties     = try(jsonencode(each.value.container_properties), {})
   retry_strategy           = try(each.value.retry_strategy, {})
   parameters               = try(each.value.parameters, null)
-  attempt_duration_seconds = try(each.value.attempt_duration_seconds, null)
+  attempt_duration_seconds = lookup(try(each.value.timeout, {}), "attempt_duration_seconds", null)
   tags                     = local.tags
   depends_on               = [aws_batch_compute_environment.this]
 }

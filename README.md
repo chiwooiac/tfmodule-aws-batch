@@ -1,13 +1,14 @@
 # tfmodule-aws-batch
 
-tfmodule-aws-batch
+`tfmodule-aws-batch` is a terraform module which creates AWS Batch resources.
+
 
 ## Usage
 
 ```hcl
 module "batch" {
   source = "../../"
-
+  #
   context = {
     project     = "symple"
     name_prefix = "symple-mc1s"
@@ -15,6 +16,7 @@ module "batch" {
       Team = "DevOps",
     }
   }
+  #
   name       = "alice"
   vpc_id     = "vpc_1234567"
   subnet_ids = [

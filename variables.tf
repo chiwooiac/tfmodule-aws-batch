@@ -140,26 +140,23 @@ variable "job_definitions" {
         memory  = 128
         command = ["echo", "hello"]
       }
-      parameters                 = {}
-      retry_strategy             = {}
-      attempt_duration_seconds   = null
+      parameters     = {}
+      retry_strategy = {}
+      timeout        = {
+        attempt_duration_seconds = null
+      }
     }
   }
   description = <<EOF
 
 job_definitions = {
-  default = {
-    name                 = "default"
+  busybox = {
+    name                 = "busybox"
     container_properties = {
       executionRoleArn = "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
       jobRoleArn       = "arn:aws:iam::123456789012:role/ecsTaskJobRole"
       image            = "busybox"
-      vcpus            = 1
-      memory           = 128
       command          = ["echo", "two"]
-      timeout          = {
-        attempt_duration_seconds = 3600
-      }
       networkConfiguration = {
         assignPublicIp = "DISABLED"
       }
@@ -186,6 +183,11 @@ job_definitions = {
           "value" : "aGVsbG8sIHdvcmxkCg"
         }
       ]
+      parameters     = {}
+      retry_strategy = {}
+      timeout        = {
+        attempt_duration_seconds = null
+      }
     }
   }
 }
