@@ -15,6 +15,17 @@ variable "compute_type" {
   default     = "FARGATE_SPOT"
 }
 
+variable "service_role_arn" {
+  description = "The full Amazon Resource Name (ARN) of the IAM role that allows AWS Batch to make calls to other AWS services on your behalf."
+  type        = string
+  default     = null
+}
+
+variable "service_policy_arn" {
+  description = "The full Amazon Resource Name (ARN) of the Additional IAM policy that allows AWS Batch to make calls to other AWS services on your behalf."
+  type        = string
+  default     = null
+}
 
 # EC2_Type
 // The instance types that may be launched. You can specify instance families to launch any instance type within
@@ -25,8 +36,21 @@ variable "compute_type" {
 variable "instance_type" {
   description = "The instance_type for compute environment to use."
   type        = list(string)
-  default     = ["optimal"]
+  default     = ["m5.large", "r5.large"]
 }
+
+variable "instance_role_arn" {
+  description = "The Amazon ECS instance role applied to Amazon EC2 instances in a compute environment. This parameter isn't applicable to jobs running on Fargate resources, and shouldn't be specified"
+  type        = string
+  default     = null
+}
+
+variable "instance_policy_arn" {
+  description = "The full Amazon Resource Name (ARN) of the Additional IAM policy that allows AWS Batch to make calls to other AWS services on your behalf."
+  type        = string
+  default     = null
+}
+
 
 variable "max_vcpus" {
   description = "Maximum allowed VCPUs allocated to instances. maximum is 32"

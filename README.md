@@ -8,27 +8,26 @@
 ```hcl
 module "batch" {
   source = "../../"
-  #
+
   context = {
     project     = "symple"
-    name_prefix = "symple-mc1s"
-    tags        = {
-      Team = "DevOps",
-    }
+    name_prefix = "symple-an2s"
+    tags        = { Team = "DevOps" }
   }
-  #
-  name       = "alice"
-  vpc_id     = "vpc_1234567"
-  subnet_ids = [
-    "subnet-00c136a3eb6ada241",
-    "subnet-011824394fc2ff1f1"
-  ]
+
+  name          = "lunar"
+  vpc_id        = "vpc-0d259217b4297"
+  subnet_ids    = ["subnet-0d259217b4297", "subnet-0d2eac17b4298"]
   min_vcpus     = 0
-  max_vcpus     = 2
+  max_vcpus     = 4
   desired_vcpus = 0
   job_queues    = {
-    default = {
-      name = "default"
+    one = {
+      name = "one"
+    }
+    two = {
+      name     = "two"
+      priority = 11
     }
   }
   job_definitions = {
@@ -38,7 +37,22 @@ module "batch" {
         executionRoleArn = "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
         jobRoleArn       = "arn:aws:iam::123456789012:role/ecsJobExecutionRole"
         image            = "busybox"
-        command          = ["echo", "two"]
+        vcpus            = 1
+        memory           = 128
+        command          = ["echo", "one"]
+      }
+      timeout = {
+        attempt_duration_seconds = 3600
+      }
+    }
+
+    two = {
+      name                 = "two"
+      container_properties = {
+        executionRoleArn     = aws_iam_role.executor.arn
+        # executionRoleArn = aws_iam_role.executor.arn
+        image                = "busybox"
+        command              = ["echo", "two"]
         networkConfiguration = {
           assignPublicIp = "DISABLED"
         }
@@ -62,15 +76,11 @@ module "batch" {
           },
           {
             "name" : "secret",
-            "value" : "aGVsbG8sIHdvcmxkCg"
+            "value" : "/stg/secret"
           }
         ]
-        ulimits     = []
-        volumes     = []
-        secrets     = []
-        mountPoints = []
       }
-      timeout          = {
+      timeout = {
         attempt_duration_seconds = 3600
       }
     }

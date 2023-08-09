@@ -9,28 +9,18 @@ locals {
   security_group_ids       = var.enabled_default_security_group ? concat(var.security_group_ids, [
     aws_security_group.this[0].id
   ]) : var.security_group_ids
+
+  create_service_role = var.service_role_arn == null ? true : false
+  service_role_arn    = local.create_service_role ? aws_iam_role.svcRole[0].arn : var.service_role_arn
+
+  create_instance_role = var.instance_role_arn == null ? true : false
+  instance_role_arn    = local.create_instance_role ? aws_iam_instance_profile.ec2[0].arn : var.instance_role_arn
 }
 
 resource "aws_batch_compute_environment" "this" {
   compute_environment_name = local.compute_environment_name
-  service_role             = aws_iam_role.svcRole.arn
+  service_role             = local.service_role_arn
   type                     = var.type
-
-  # EC2_TYPE
-  dynamic "compute_resources" {
-    for_each = var.compute_type == "EC2" || var.compute_type == "SPOT" ? [1] : []
-    content {
-      type                = var.compute_type
-      instance_role       = aws_iam_instance_profile.ecs.arn
-      instance_type       = tolist(var.instance_type)
-      security_group_ids  = local.security_group_ids
-      subnets             = coalesce(var.subnet_ids)
-      min_vcpus           = var.min_vcpus
-      max_vcpus           = var.max_vcpus
-      desired_vcpus       = var.desired_vcpus
-      allocation_strategy = var.allocation_strategy
-    }
-  }
 
   # FARGATE_TYPE
   dynamic "compute_resources" {
@@ -38,10 +28,26 @@ resource "aws_batch_compute_environment" "this" {
     content {
       type               = var.compute_type
       security_group_ids = local.security_group_ids
-      subnets            = coalesce(var.subnet_ids)
+      subnets            = compact(var.subnet_ids)
       min_vcpus          = var.min_vcpus
       max_vcpus          = var.max_vcpus
       desired_vcpus      = var.desired_vcpus
+    }
+  }
+
+  # EC2_TYPE
+  dynamic "compute_resources" {
+    for_each = var.compute_type == "EC2" || var.compute_type == "SPOT" ? [1] : []
+    content {
+      type                = var.compute_type
+      instance_role       = local.instance_role_arn
+      instance_type       = compact(var.instance_type)
+      security_group_ids  = local.security_group_ids
+      subnets             = compact(var.subnet_ids)
+      min_vcpus           = var.min_vcpus
+      max_vcpus           = var.max_vcpus
+      desired_vcpus       = var.desired_vcpus
+      allocation_strategy = var.allocation_strategy
     }
   }
 
@@ -51,7 +57,7 @@ resource "aws_batch_compute_environment" "this" {
   // aws_iam_role_policy_attachment; otherwise, the policy may be destroyed too soon and the compute environment
   // will then get stuck in the DELETING.
   // ref: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/batch_compute_environment
-  depends_on = [aws_iam_role_policy_attachment.svcRole]
+  depends_on = [aws_iam_role_policy_attachment.AWSBatchServiceRole]
 }
 
 module "jq" {

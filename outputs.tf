@@ -37,3 +37,11 @@ output "job_definition_arns" {
     k.arn.name => k.arn.value
   }
 }
+
+output "batch_service_policy_name" {
+  value = local.batch_service_policy_name
+}
+
+output "batch_instance_policy_name" {
+  value = local.batch_instance_policy_name
+}
